@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stereo-PIV-based assessment of ADCP performance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --green:      #22BB00;
+      --bg:         #0f0f0f;
+      --bg-card:    #181818;
+      --border:     #262626;
+      --text:       #e2e2e2;
+      --text-muted: #888;
+      --text-dim:   #444;
+      --white:      #ffffff;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(15,15,15,0.94);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 52px;
+    }
+
+    .nav-brand {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+    }
+
+    nav ul a {
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 6px 0;
+      display: block;
+    }
+
+    /* ── LOGO BAR ── */
+    .logo-bar {
+      background: #ffffff;
+      border-bottom: 1px solid #e8e8e8;
+      padding: 14px 20px;
+    }
+
+    .logo-bar-label {
+      text-align: center;
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #aaa;
+      margin-bottom: 12px;
+    }
+
+    .logo-bar-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px 28px;
+    }
+
+    .logo-bar img {
+      height: 26px;
+      width: auto;
+      object-fit: contain;
+      display: block;
+      flex-shrink: 0;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      padding: 48px 20px 44px;
+      text-align: center;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 100% 60% at 50% -10%,
+        rgba(34,187,0,0.11) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-tag {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green);
+      border: 1px solid rgba(34,187,0,0.35);
+      border-radius: 2px;
+      padding: 4px 10px;
+      margin-bottom: 22px;
+    }
+
+    .hero h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.35;
+      letter-spacing: -0.01em;
+      margin-bottom: 20px;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hero-meta span {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--green);
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    /* ── SECTION ── */
+    .section {
+      padding: 48px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .section-label span {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--green);
+      white-space: nowrap;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── VIDEO ── */
+    .video-card {
+      background: #000;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .video-card video {
+      width: 100%;
+      display: block;
+    }
+
+    .video-caption {
+      padding: 12px 16px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+      line-height: 1.5;
+    }
+
+    /* ── METRICS ── */
+    .metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 36px;
+    }
+
+    .metric {
+      background: var(--bg-card);
+      padding: 20px 16px;
+      text-align: center;
+    }
+
+    .metric-value {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--green);
+      font-family: 'JetBrains Mono', monospace;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .metric-label {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      line-height: 1.3;
+    }
+
+    /* ── PROSE ── */
+    .prose {
+      color: #aaa;
+      font-size: 0.97rem;
+      line-height: 1.85;
+    }
+
+    .prose strong { color: var(--text); font-weight: 600; }
+
+    /* ── GALLERY ── */
+    .gallery {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .fig-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .fig-card img {
+      width: 100%;
+      display: block;
+    }
+
+    .fig-caption {
+      padding: 10px 14px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+      line-height: 1.4;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 32px 20px;
+      text-align: center;
+    }
+
+    footer p {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      line-height: 1.8;
+    }
+
+    footer .green { color: var(--green); }
+
+    /* ── TABLET+ (≥ 640px) ── */
+    @media (min-width: 640px) {
+      nav { padding: 0 32px; }
+
+      .logo-bar img {
+        height: 32px;
+      }
+
+      .hero {
+        padding: 72px 48px 64px;
+      }
+
+      .hero h1 {
+        font-size: 1.85rem;
+        max-width: 720px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .hero-meta {
+        flex-direction: row;
+        justify-content: center;
+        gap: 20px;
+      }
+
+      .section {
+        padding: 64px 48px;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      .metrics {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      .gallery {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      footer {
+        padding: 40px 48px;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ NAV ═══════════════════════════════════════════════════════════════ -->
+<nav>
+  <div class="nav-brand">EGU 2026</div>
+  <ul>
+    <li><a href="#video">Video</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#figures">Figures</a></li>
+  </ul>
+</nav>
+
+<!-- ══ LOGO BAR ══════════════════════════════════════════════════════════ -->
+<div class="logo-bar">
+  <div class="logo-bar-row">
+    <img src="Logos/HS-Bochum Logo.png" alt="Bochum University of Applied Sciences" />
+    <img src="Logos/DFG Logo.png"        alt="DFG" />
+    <img src="Logos/König Logo.png"      alt="König" />
+    <img src="Logos/EGU Logo.png"        alt="EGU 2026 General Assembly" />
+  </div>
+</div>
+
+<!-- ══ HERO ══════════════════════════════════════════════════════════════ -->
+<div class="hero">
+  <div class="hero-tag">EGU General Assembly 2026 &nbsp;·&nbsp; Poster</div>
+  <h1>Stereo-PIV-based assessment of ADCP performance in turbulent open-channel flow</h1>
+  <div class="hero-meta">
+    <span><span class="dot"></span> Bochum University of Applied Sciences</span>
+    <span><span class="dot"></span> ITF – Institut für Thermo- und Fluiddynamik</span>
+  </div>
+</div>
+
+<!-- ══ VIDEO ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="video">
+  <div class="section-label"><span>Flow Visualization</span></div>
+  <div class="video-card">
+    <video autoplay loop muted playsinline>
+      <source src="your-video.mp4" type="video/mp4" />
+    </video>
+    <div class="video-caption">Stereo-PIV velocity field — instantaneous flow visualization</div>
+  </div>
+</div>
+
+<!-- ══ ABOUT ══════════════════════════════════════════════════════════════ -->
+<div class="section" id="about">
+  <div class="section-label"><span>About this Study</span></div>
+
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-value">3D</div>
+      <div class="metric-label">Velocity Components</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value">560 mm</div>
+      <div class="metric-label">Flow Depth</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value">3</div>
+      <div class="metric-label">Flow Rates</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value">PIV + ADCP</div>
+      <div class="metric-label">Methods</div>
+    </div>
+  </div>
+
+  <p class="prose">
+    <!-- PROJEKTBESCHREIBUNG HIER EINFÜGEN -->
+    Replace this text with your project description.
+    You can use <strong>bold text</strong> for key terms.
+  </p>
+</div>
+
+<!-- ══ FIGURES ════════════════════════════════════════════════════════════ -->
+<div class="section" id="figures">
+  <div class="section-label"><span>Figures</span></div>
+  <div class="gallery">
+    <div class="fig-card">
+      <img src="image1.png" alt="Figure 1" />
+      <div class="fig-caption">Fig. 1 — Description here</div>
+    </div>
+    <div class="fig-card">
+      <img src="image2.png" alt="Figure 2" />
+      <div class="fig-caption">Fig. 2 — Description here</div>
+    </div>
+    <div class="fig-card">
+      <img src="image3.png" alt="Figure 3" />
+      <div class="fig-caption">Fig. 3 — Description here</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FOOTER ════════════════════════════════════════════════════════════ -->
+<footer>
+  <p>EGU General Assembly 2026<br>
+  <span class="green">ITF – Institut für Thermo- und Fluiddynamik</span><br>
+  Bochum University of Applied Sciences &nbsp;·&nbsp; Funded by DFG</p>
+</footer>
+
+</body>
+</html>
